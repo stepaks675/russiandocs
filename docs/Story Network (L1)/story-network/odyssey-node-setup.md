@@ -1,5 +1,5 @@
 ---
-title: Node Setup
+title: Установка Ноды
 excerpt: ''
 deprecated: false
 hidden: false
@@ -10,92 +10,93 @@ metadata:
 next:
   description: ''
 ---
-This section will guide you through how to setup a Story node. Story draws inspiration from ETH PoS in decoupling execution and consensus clients. The execution client `story-geth` relays EVM blocks into the `story` consensus client via Engine API, using an ABCI++ adapter to make EVM state compatible with that of CometBFT. With this architecture, consensus efficiency is no longer bottlenecked by execution transaction throughput.
+
+Этот раздел поможет вам настроить ноду Story. Story черпает вдохновение из PoS Ethereum, разделяя исполнение и консенсус. Клиент исполнения `story-geth` передает блоки EVM в клиент консенсуса `story` через Engine API, используя адаптер ABCI++ для совместимости состояния EVM с состоянием CometBFT. Такая архитектура обеспечивает эффективность консенсуса, не ограниченную пропускной способностью выполнения транзакций.
 
 ![](https://files.readme.io/7dee0e873bcb2aeeaf12c3c0d63db44692c1bfe5cee599c52ea5c465240967a4-image.png)
 
-The `story` and `geth` binaries, which make up the clients required for running Story nodes, are available from our latest `release` pages:
+Бинарные файлы `story` и `geth`, необходимые для запуска узлов Story, доступны на страницах наших последних релизов:
 
-* **`story-geth`execution client:**
-  * Release Link: [**Click here**](https://github.com/piplabs/story-geth/releases)
-  * Latest Stable Binary (v0.10.1): [**Click here**](https://github.com/piplabs/story-geth/releases/tag/v0.10.1)
-* **`story`consensus client:**
-  * Releases link: [**Click here**](https://github.com/piplabs/story/releases)
-  * Latest Stable Binary (v0.13.0): [**Click here**](https://github.com/piplabs/story/releases/tag/v0.13.0)
+* **Клиент исполнения `story-geth`:**
+  * Релизы: [**тут**](https://github.com/piplabs/story-geth/releases)
+  * Последний стабильный релиз (v0.10.1): [**тут**](https://github.com/piplabs/story-geth/releases/tag/v0.10.1)
+* **Клиент консенсуса `story`:**
+  * Релизы: [**тут**](https://github.com/piplabs/story/releases)
+  * Последний стабильный релиз (v0.13.0): [**тут**](https://github.com/piplabs/story/releases/tag/v0.13.0)
 
-***IMPORTANT: For the Odyssey testnet, it is crucial to start with version v0.12.0, as this version is required before applying any subsequent upgrades. Download this version first to ensure compatibility with the testnet environment. Also, verify that you are downloading the binary matching your system architecture***
+***ВАЖНО: Для тестовой сети Odyssey необходимо начать с версии v0.12.0, поскольку эта версия обязательна перед применением любых последующих обновлений. Сначала скачайте эту версию, чтобы обеспечить совместимость с тестовой сетью. Также убедитесь, что вы загружаете бинарные файлы, соответствующие архитектуре вашей системы.***
 
-## System Specs
+## Системные требования
 
-| Hardware  | Requirement |
+| Аппаратное обеспечение  | Требования |
 | --------- | ----------- |
-| CPU       | 4 Cores     |
-| RAM       | 16 GB       |
-| Disk      | 200 GB      |
-| Bandwidth | 25 MBit/s   |
+| CPU       | 4 Ядра    |
+| RAM       | 16 ГБ       |
+| Диск     | 200 ГБ      |
+| Сеть | 25 МБит/с   |
 
-On AWS, we recommend using the M6i, R6i, or C6i series.
+На AWS рекомендуется использовать серии M6i, R6i или C6i.
 
-## Ports
+## Порты
 
-*Ensure all ports needed for your node functionality are needed, described below*
+*Убедитесь, что все необходимые порты для работы узла открыты, как указано ниже:*
 
 * `story-geth`
   * 8545
-    * Required if you want your node to interface via JSON-RPC API over HTTP
+    * Требуется, если вы хотите взаимодействовать с нодой через JSON-RPC API по HTTP.
   * 8546
-    * Required for websockets interaction
+    * Требуется для взаимодействия через WebSockets.
   * 30303 (TCP + API)
-    * MUST be open for p2p communication
+    * ДОЛЖЕН быть открыт для p2p-коммуникации.
 * `story`
   * 26656
-    * MUST be open for consensus p2p communication
+    * ДОЛЖЕН быть открыт для p2p-коммуникации консенсуса.
   * 26657
-    * Required if you want your node interfacing for Tendermint RPC
+    * Требуется для взаимодействия с RPC Tendermint.
   * 26660
-    * Needed if you want to expose prometheus metrics
+    * Нужен для предоставления метрик Prometheus.
 
-## Default Folder
+## Стандартные пути
 
-By default, we setup the following default data folders for consensus and execution clients:
+По умолчанию создаются следующие папки данных для клиентов консенсуса и исполнения:
 
 * Mac OS X
-  * `story` data root: `~/Library/Story/story`
-  * `story-geth` data root: `~/Library/Story/geth`
+  * `story` корневая папка: `~/Library/Story/story`
+  * `story-geth` корневая папка: `~/Library/Story/geth`
 * Linux
-  * `story` data root: `~/.story/story`
-  * `story-geth` data root:  `~/.story/geth`
+  * `story` корневая папка: `~/.story/story`
+  * `story-geth` корневая папка:  `~/.story/geth`
 
-*For the remainder of this tutorial, we will refer to the`story` data root as `${STORY_DATA_ROOT}` and the `geth` data root as `${GETH_DATA_ROOT}`.*
+*В дальнейшем в документации корневую папку данных `story` будем называть `${STORY_DATA_ROOT}`, а `story-geth` — `${GETH_DATA_ROOT}`.*
 
-*You are able to override these configs on the`story` client side by passing `--home ${STORY_CONFIG_FOLDER}`. Similarly, for `geth`, you may use `--config ${GETH_CONFIG_FOLDER}`. For information on how overrides work, view our readme on [setting up a private network](https://github.com/piplabs/story?tab=readme-ov-file#creating-a-private-network).*
+*Вы можете переопределить эти настройки на стороне клиента `story`, указав `--home ${STORY_CONFIG_FOLDER}`, а для клиента `geth` — `--config ${GETH_CONFIG_FOLDER}`. Дополнительную информацию о переопределении конфигурации можно найти в [руководстве по созданию частной сети](https://github.com/piplabs/story?tab=readme-ov-file#creating-a-private-network). *
 
-When downloading the Story binaries, note that the file name will vary based on your operating system. For example, on a Linux system with an AMD64 architecture, the binary might be named `story-linux-amd64` or `geth-linux-amd`. This naming convention helps with compatibility identification, but for simplicity, we recommend renaming the binary file to story after download.
+После загрузки бинарных файлов Story обратите внимание, что имя файла зависит от операционной системы. Например, на Linux с архитектурой AMD64 файл может называться `story-linux-amd64` или `geth-linux-amd`. Для упрощения работы рекомендуется переименовать файл в `story` после загрузки:
 
 ```
 mv story-linux-amd64 story
 ```
 
-This allows you to execute the program directly using the story command in your terminal. For the remainder of this documentation, we will use the `story` name convention.
+Теперь вы можете запускать программу, используя команду `story` в терминале. В дальнейшем в документации будем использовать название `story`.
 
-## Execution Client Setup (`story-geth`)
+## Настройка клиента исполнения (`story-geth`)
 
-1. (Mac OS X only) The OS X binaries have yet to be signed by our build process, so you may need to unquarantine them manually:
+1. (Mac OS X)  Бинарные файлы для Mac OS X еще не подписаны, поэтому их может потребоваться снять с карантина вручную:
 
    ```bash
    sudo xattr -rd com.apple.quarantine ./geth
    ```
-2. You may now run `geth` with the following command:
+2. Теперь вы можете запустить `geth` следующей командой:
 
    ```bash
    ./geth --odyssey --syncmode full
    ```
 
-   * Currently, `snap` sync mode, the default, is still undergoing development
+   * Режим синхронизации `snap` (по умолчанию) все еще находится в разработке.
 
-### Clear State
+### Сброс
 
-If you ever run into issues and would like to try joining the network from a cleared state, run the following:
+Если у вас возникли проблемы, и вы хотите попробовать подключиться к сети с чистого состояния, выполните следующую команду:
 
 ```bash
 rm -rf ${GETH_DATA_ROOT} && ./geth --odyssey --syncmode full
@@ -104,9 +105,9 @@ rm -rf ${GETH_DATA_ROOT} && ./geth --odyssey --syncmode full
 * Mac OS X: `rm -rf ~/Library/Story/geth/* && ./geth --odyssey --syncmode full`
 * Linux: `rm -rf ~/.story/geth/* && ./geth --odyssey --syncmode full`
 
-### Debugging
+### Отладка
 
-If you would like to check the status of `geth` while it is running, it is helpful to communicate via its built-in IPC-RPC server by running the following:
+Чтобы проверить статус работы `geth`, полезно использовать встроенный IPC-RPC сервер, запустив следующую команду:
 
 ```bash
 geth attach ${GETH_DATA_ROOT}/geth.ipc
@@ -117,44 +118,46 @@ geth attach ${GETH_DATA_ROOT}/geth.ipc
 * Linux:
   * `geth attach ~/.story/geth/odyssey/geth.ipc`
 
-This will connect you to the IPC server from which you can run some helpful queries:
+Подключившись к IPC серверу, вы можете использовать следующие команды:
 
-* `eth.blockNumber` will print out the latest block geth is sync’d to - if this is `undefined` there is likely a peer connection or syncing issue
-* `admin.peers` will print out a list of other `geth` nodes your client is connected to - if this is blank there is a peer connectivity issue
-* `eth.syncing` will return `true` if geth is in the process of syncing, `false` otherwise
+* `eth.blockNumber` покажет последний блок, до которого синхронизирован geth. Если результат `undefined`, возможно, есть проблема с подключением к пиру или синхронизацией.
+* `admin.peers` отобразит список других нод `geth`, с которыми ваш клиент подключен. Если список пуст, проблема в подключении к пиру.
+* `eth.syncing` вернет `true`, если geth синхронизируется, и `false` в противном случае.
 
-## Consensus Client Setup (`story`)
+## Настройка клиента консенсуса (`story`)
 
-1. (Mac OS X Only) The OS X binaries have yet to be signed by our build process, so you may need to unquarantine them manually:
+1. (Mac OS X Only) Бинарные файлы для Mac OS X еще не подписаны, поэтому их может потребоваться снять с карантина вручную:
 
    ```bash
    sudo xattr -rd com.apple.quarantine ./story
    ```
-2. Initialize the `story` client with the following command:
+2. Инициализируйте клиент `story` с помощью команды:
 
    ```bash
    ./story init --network odyssey 
    ```
 
-   * By default, this uses your username for the moniker (the human-readable identifier for your node), you may override this by passing in `--moniker ${NODE_MONIKER}`
-   * If you would like to initialize the node using your own data directory, you can pass in `--home ${STORY_DATA_DIR}`
-   * If you already have config and data files, and would like to re-initialize from scratch, you can add the `--clean` flag
-3. Now, you may run `story` with the following command:
+   * По умолчанию в качестве монникера (идентификатора вашей ноды) используется имя пользователя. Вы можете переопределить его, передав флаг `--moniker ${NODE_MONIKER}`.
+   * Если вы хотите использовать свою собственную директорию данных, укажите её через флаг `--home ${STORY_DATA_DIR}`.
+   * Если у вас уже есть файлы конфигурации и данных, но вы хотите полностью их сбросить, добавьте флаг `--clean`.
+3. Теперь запустите `story` командой:
 
    ```bash
    ./story run
    ```
 
-***IMPORTANT: If you are setting up a new node, you must start with version v0.12.0***, as this base version is required before applying any subsequent upgrades. Afterward, install each subsequent upgrade in order. Follow these steps carefully:
+***ВАЖНО: Если вы настраиваете новый узел, начните с версии v0.12.0***, так как эта версия является базовой перед установкой последующих обновлений. После этого установите каждое обновление по порядку. Следуйте этим шагам:
 
-1. Download [version v0.12.0](https://github.com/piplabs/story/releases/tag/v0.12.0), ensuring you select the binary that matches your system architecture.
-2. Initialize and run version v0.12.0 following the initialization and run instructions provided above.
-3. Download and upgrade to the following releases using [this guide](https://medium.com/story-protocol/story-v0-10-0-node-upgrade-guide-42e2fbcfcb9a):
-   1. [v0.12.1 ](https://github.com/piplabs/story/releases/tag/v0.12.1) upgrade at height 322000
+1. Скачайте [версию v0.12.0](https://github.com/piplabs/story/releases/tag/v0.12.0), выбрав бинарный файл, подходящий для вашей архитектуры.
+2. Инициализируйте и запустите версию v0.12.0, следуя инструкциям выше.
+3. Скачайте и обновите клиент до следующих версий, используя [это руководство](https://medium.com/story-protocol/story-v0-10-0-node-upgrade-guide-42e2fbcfcb9a):
+   1. [v0.12.1 ](https://github.com/piplabs/story/releases/tag/v0.12.1) обновление на высоте блока 322000
 
-Note: currently you might see a bunch of `Stopping peer for error` logs - this is a known issue around peer connection stability with our bootnodes that we are currently fixing - for now please ignore it and rest assured that it does not impact block progression.
+Примечание: в процессе работы вы можете увидеть сообщения `Stopping peer for error`. Это известная проблема, связанная с нестабильностью соединения с узлами, но она не влияет на прогресс блоков.
 
-*If you ever run into issues and would like to try re-joining the network**WHILE PRESERVING YOUR KEY,** run the following:*
+### Сброс
+
+*Если вы столкнулись с проблемами и хотите попробовать повторно подключиться к сети **СОХРАНИВ ВАШ КЛЮЧ**, выполните следующую команду:*
 
 ```bash
 rm -rf ${STORY_DATA_ROOT}/data/* && \
@@ -175,7 +178,7 @@ echo '{"height": "0", "round": 0, "step": 0}' > ${STORY_DATA_ROOT}/data/priv_val
   ./story run
   ```
 
-\*If you ever run into issues and would like to try joining the network from a **COMPLETELY** fresh state, run the following (**\*WARNING: THIS WILL DELETE YOUR`priv_validator_key.json` FILE )**
+\*Если вы хотите начать с **ПОЛНОСТЬЮ** чистого состояния (**\*ВНИМАНИЕ: ЭТО УДАЛИТ ВАШ ФАЙЛ priv_validator_key.json**):
 
 ```bash
 rm -rf ${STORY_DATA_ROOT} && ./story init --network odyssey && ./story run
@@ -186,46 +189,25 @@ rm -rf ${STORY_DATA_ROOT} && ./story init --network odyssey && ./story run
 * Linux:
   * `rm -rf ~/.story/story/* && ./story init --network odyssey && ./story run`
 
-To quickly check if the node is syncing, you could
+Чтобы проверить, синхронизируется ли узел:
 
-* Check the geth RPC endpoint to see if blocks are increasing:
+* Проверьте RPC-эндпоинт geth, чтобы убедиться, что блоки увеличиваются:
   ```bash
   curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' [http://localhost:8545](http://localhost:8545/)
   ```
-* Attach to `geth` as explained above and see if the `eth.blockNumber` is increasing
+* Подключитесь к `geth` и проверьте, увеличивается ли eth.blockNumber.
 
-### Clear State
+### Пользовательская Конфигурация
 
-If you ever run into issues and would like to try joining the network from a fresh state, run the following:
+Вы можете настроить ноду, изменив следующие файлы:
 
-```bash
-rm -rf ${STORY_DATA_ROOT} && ./story init --network odyssey && ./story run
-```
+* `${STORY_DATA_ROOT}/config/config.toml` — изменение сетевых и консенсусных настроек.
+* `${STORY_DATA_ROOT}/config/story.toml` — обновление конфигураций клиента.
+* `${STORY_DATA_ROOT}/priv_validator_key.json` — файл с ключом валидатора, его можно заменить своим собственным.
 
-* Mac OS X:
-  * `rm -rf ~/Library/Story/story/* && ./story init --network odyssey && ./story run`
-* Linux:
-  * `rm -rf ~/.story/story/* && ./story init --network odyssey && ./story run`
+### Пользовательская Автоматизация
 
-To quickly check if the node is syncing, you could
-
-* Check the geth RPC endpoint to see if blocks are increasing:
-  ```bash
-  curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' [http://localhost:8545](http://localhost:8545/)
-  ```
-* Attach to `geth` as explained above and see if the `eth.blockNumber` is increasing
-
-### Custom Configuration
-
-To override your own node settings, you can do the following:
-
-* `${STORY_DATA_ROOT}/config/config.toml` can be modified to change network and consensus settings
-* `${STORY_DATA_ROOT}/config/story.toml` to update various client configs
-* `${STORY_DATA_ROOT}/priv_validator_key.json` is a sensitive file containing your validator key, but may be replaced with your own
-
-### Custom Automation
-
-Below we list a sample `Systemd` configuration you may use on Linux
+Пример конфигурации `Systemd` для Linux:
 
 ```bash
 # geth
@@ -276,22 +258,21 @@ WantedBy=multi-user.target
 
 ```
 
-### Debugging
+### Отладка
 
-If you would like to check the status of `story` while it is running, it is helpful to query its internal JSONRPC/HTTP endpoint. Here are a few helpful commands to run:
+Для проверки статуса `story` можно выполнить запрос к его внутреннему JSONRPC/HTTP-эндпоинту. Полезные команды:
 
 * `curl localhost:26657/net_info | jq '.result.peers[].node_info.moniker'`
-  * This will give you a list of consesus peers the node is sync’d with by moniker
+  * Получить список подключённых узлов
 * `curl localhost:26657/health`
-  * This will let you know if the node is healthy - `{}` indicates it is
+  * Проверить состояние узла: - `{}` — узел работает корректно.
 
-### Common Issues
+### Распостранённые проблемы
 
 1. `auth failure: secret conn failed: read tcp ${IP_A}:${PORT_A}->${IP_B}:{PORT_B}: i/o timeout`
-   * This issue occurs when the default `external_address` listed in `config.toml` (`””`) is not being introspected properly via the listener. To fix it, please remove `addrbook.json` in `{STORY_DATA_ROOT}/config/addrbook.json` and add `exteral_address = {YOUR_NODE_PUBLIC_IP_ADDRESS}` in `config.toml`
+   * Эта ошибка случается, когда `external_address` по умолчанию, находящийся в `config.toml` (`””`) не считывается слушателем. Решение: удалите файл `addrbook.json` в `{STORY_DATA_ROOT}/config/addrbook.json` и добавьте `external_address = {ВАШ_ПУБЛИЧНЫЙ_IP}` в `config.toml`.
 
-### Automated Upgrades
+### Автоматические обновления
+Для упрощения обновлений клиента консенсуса, особенно во время хардфорков, рекомендуется использовать [Cosmovisor](https://docs.cosmos.network/v0.45/run-node/cosmovisor.html). Это позволяет автоматизировать процесс обновления без необходимости перезапускать клиента.
 
-To manage consensus client upgrades more easily, especially for hard forks, we recommend using [Cosmovisor](https://docs.cosmos.network/v0.45/run-node/cosmovisor.html), which allows you to automate the process of upgrading client binaries without having to restart your client.
-
-To get started, **your client must be upgraded to at least version 0.9.13**. [Here](https://medium.com/story-protocol/story-v0-10-0-node-upgrade-guide-42e2fbcfcb9a) is a  guide to help you with the setup of automated upgrades with Cosmovisor.
+Для начала клиент **должен быть обновлён хотя бы до версии 0.9.13**. Подробное руководство по настройке Cosmovisor можно найти [здесь](https://medium.com/story-protocol/story-v0-10-0-node-upgrade-guide-42e2fbcfcb9a).
