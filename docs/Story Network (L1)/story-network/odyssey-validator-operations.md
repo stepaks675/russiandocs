@@ -1,5 +1,5 @@
 ---
-title: Validator Operations
+title: Операции с Валидатором
 excerpt: ''
 deprecated: false
 hidden: false
@@ -10,48 +10,48 @@ metadata:
 next:
   description: ''
 ---
-## Quick Links
+## Быстрые ссылки
 
-* [Story Geth Releases](https://github.com/piplabs/story-geth/releases)
-* [Story Releases](https://github.com/piplabs/story/releases/)  
+* [Релизы Story Geth](https://github.com/piplabs/story-geth/releases)
+* [Релизы Story](https://github.com/piplabs/story/releases/)  
 
-# Overview
+# Обзор
 
-This section will guide you through how you can run your own validator. Validator operations may be done via the `story` consensus client.
+Этот раздел поможет вам настроить и управлять своим валидатором. Операции с валидаторами могут выполняться с использованием клиента консенсуса `story`.
 
-> 📘 Note
+> 📘 Примечание
 >
-> The below operations do not requiring running a node! However, if you would like to participate in staking rewards, you must run a validator node.
+> Для выполнения операций ниже не требуется запускать ноду! Однако, если вы хотите участвовать в получении наград за стейкинг, необходимо запустить ноду валидатора.
 
-Before proceeding, it is important to familiarize yourself with the difference between a delegator and a validator:
+Перед началом важно понять разницу между делегатором и валидатором:
 
-* A **validator** is a full node that participates in consensus whose signed key resides in the `priv_validator_key.json` file under your `story` data directory. To print out your validator key details you may refer to the [validator key export section](https://docs.story.foundation/docs/validator-operations#validator-key-export)
-* A **delegator** refers to an account operator that holds `IP` and wishes to participate in consensus rewards but without needing to run a validator themselves. 
+* **Валидатор** — это полный узел (нода), участвующий в консенсусе, чей подписанный ключ хранится в файле `priv_validator_key.json` в каталоге данных `story`. Чтобы посмотреть детали вашего ключа валидатора, ознакомьтесь с разделом [экспорта ключей валидатора](https://docs.story.foundation/docs/validator-operations#validator-key-export).
+* **Делегатор** — это оператор аккаунта, владеющий токенами IP и желающий участвовать в получении наград консенсуса без необходимости запускать валидатора.
 
-In the same folder as where your `story` binary resides, add a `.env` file with a `PRIVATE_KEY` whose account has `IP` funded (*you may see the[Faucet page](doc:faucet) for details on how to fund an account).* **We recommend using your delegator account for all below operations.**
+В той же папке, где находится ваш бинарный файл `story`, создайте файл `.env` с переменной `PRIVATE_KEY`, где будет указан приватный ключ аккаунта, имеющего `IP`. (Вы можете посетить [Кран](doc:faucet), чтобы пополнить аккаунт.) **Рекомендуется использовать аккаунт делегатора для выполнения всех операций ниже.**
 
-> 📘 Note
+> 📘 Примечание
 >
-> You may also issue transactions as the validator itself. To get the EVM private key corresponding to your validator, please refer to the [Validator Key Export](https://docs.story.foundation/docs/validator-operations#validator-key-export) section.
+> Вы также можете отправлять транзакции от имени самого валидатора. Чтобы получить EVM приватный ключ вашего валидатора, обратитесь к разделу [экспорта ключей валидатора](https://docs.story.foundation/docs/validator-operations#validator-key-export).
 
-The `.env` file should look like the following *(make sure not to add a 0x prefix):*
+Пример файла `.env` *(без добавления префикса 0x)*:
 
 ```bash
 # ~/.env
 PRIVATE_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-With this, you are all set to perform different validator operations! Below, we will guide you through all of those supported via the CLI:
+Теперь вы готовы выполнять различные операции с валидатором! В следующем разделе представлены команды CLI, необходимые для этих операций.
 
-## Validator Key Export
+## Экспорт ключа валидатора
 
-By default, when you run `./story init` a validator key is created for you. To view your validator key, run the following command:
+По умолчанию, при выполнении команды `./story init` для вас создаётся ключ валидатора. Чтобы просмотреть ключ валидатора, выполните следующую команду:
 
 ```bash
 ./story validator export
 ```
 
-This will print out your validator public key file in compressed and uncompressed formats. By default, we use the hex-encoded compressed key for public identification.
+Эта команда выведет публичный ключ вашего валидатора в сжатом и несжатом форматах. По умолчанию для публичной идентификации используется ключ в сжатом формате с кодировкой в hex.
 
 ```text
 Compressed Public Key (hex): 03bdc7b8940babe9226d52d7fa299a1faf3d64a82f809889256c8f146958a63984
@@ -62,67 +62,67 @@ Validator Address: storyvaloper1p470h0jtph4n5hztallp8vznq8ehylsw9vpddx
 Delegator Address: story1p470h0jtph4n5hztallp8vznq8ehylswtr4vxd
 ```
 
-In addition, if you want to export the derived EVM private key of your validator into the default data config directory, please run the following:
+Чтобы экспортировать приватный ключ EVM вашего валидатора в конфигурационную папку по умолчанию, выполните команду:
 
 ```bash
 ./story validator export --export-evm-key
 ```
 
-* You may add `--evm-key-path` to specify a different download location
+* Вы также можете указать путь для сохранения ключа с помощью параметра `--evm-key-path`.
 
-*If you would like to issue transactions as your validator, and not as a delegator, you may export the key to your`.env` file and ensure it has IP sent to it, e.g. via`./story validator export --export-evm-key --evm-key-path .env`*
+*Если вы хотите отправлять транзакции от имени валидатора, экспортируйте ключ в файл `.env`, например: `./story validator export --export-evm-key --evm-key-path .env`*
 
-## Validator Creation
+## Создание валидатора
 
-To create a new validator, run the following command:
+Чтобы создать нового валидатора, выполните команду:
 
 ```bash
 ./story validator create --stake ${AMOUNT_TO_STAKE_IN_WEI} --moniker ${VALIDATOR_NAME}
 ```
 
-This will create the validator corresponding to your validator key saved in `priv_validator_key.json`, providing the validator with `{$AMOUNT_TO_STAKE_IN_WEI}` IP to self-stake. *Note that to participate in consensus, at least 1024 IP must be staked (equivalent to`1024000000000000000000 wei`)!*
+Эта команда создаст валидатора, используя ключ из файла `priv_validator_key.json`, и самоделегирует указанное количество IP в формате `${AMOUNT_TO_STAKE_IN_WEI}`. *Для участия в консенсусе необходимо застейкать как минимум 1024 IP (`1024000000000000000000 wei`)!*
 
-Below is a list of optional flags to further customize your validator setup:
+Ниже приведён список флагов для точной настройки конфигурации валидатора:
 
-**Available Flags:**
+**Флаги:**
 
-* `--stake`: Sets the amount the validator will self-delegate in wei (default is `1024000000000000000000` wei).
-* `--moniker`: Defines a custom name for the validator, visible to users on the network.
-* `--chain-id`: Specifies the Chain ID for the transaction. By default, this is set to `1516`.
-* `--commission-rate`: Sets the validator's commission rate in bips (1% = 100 bips). For instance, `1000` represents a 10% commission (default is `1000`).
-* `--explorer`: Specifies the URL of the blockchain explorer (default: [https://odyssey.storyscan.xyz](https://odyssey.storyscan.xyz)).
-* `--keyfile`: Points to the path of the Tendermint key file (default: `/home/node_story_odyssey/.story/story/config/priv_validator_key.json`).
-* `--max-commission-change-rate`: Sets the maximum rate at which the validator's commission can change, in bips. For example, `100` represents a maximum change of 1% (default is `1000`).
-* `--max-commission-rate`: Defines the maximum commission rate the validator can charge, in bips. For instance, `5000` allows a 50% maximum rate (default is `5000`).
-* `--private-key`: Uses a specified private key for signing the transaction. If not set, the key in `priv_validator_key.json` will be used.
-* `--rpc`: Sets the RPC URL to connect to the network (default: [https://odyssey.storyrpc.io](https://odyssey.storyrpc.io)).
-* `--unlocked`: Determines if unlocked token staking is supported (`true` for unlocked staking, `false` for locked staking). By default, this is set to `true`.
+* `--stake`: Устанавливает сумму, которую валидатор само-делегирует (по умолчанию `1024000000000000000000` wei).
+* `--moniker`: Определяет имя валидатора, которое будет видно пользователям в сети.
+* `--chain-id`: Указывает ID цепочки (Chain ID) для транзакции. По умолчанию значение — `1516`.
+* `--commission-rate`: Устанавливает размер комиссии валидатора в bips (1% = 100 bips). Например, значение `1000` соответствует комиссии 10% (по умолчанию `1000`).
+* `--explorer`: Указывает URL обозревателя блокчейна (по умолчанию: [https://odyssey.storyscan.xyz](https://odyssey.storyscan.xyz)).
+* `--keyfile`: Путь к файлу ключа Tendermit (по умолчанию: `/home/node_story_odyssey/.story/story/config/priv_validator_key.json`).
+* `--max-commission-change-rate`: Устанавливает максимальную скорость изменения комиссии валидатора в bips. Например, значение `100` означает максимум 1% изменения (по умолчанию `1000`).
+* `--max-commission-rate`: Определяет максимальную ставку комиссии, которую может взимать валидатор, в bips. Например, `5000` позволяет максимальную комиссию в 50% (по умолчанию `5000`).
+* `--private-key`: Использует указанный приватный ключ для подписания транзакции. Если не указано, будет использоваться ключ из `priv_validator_key.json`.
+* `--rpc`: Устанавливает URL RPC для подключения к сети (по умолчанию: [https://odyssey.storyrpc.io](https://odyssey.storyrpc.io)).
+* `--unlocked`: Определяет, поддерживается ли стейкинг с разблокированными токенами (`true` для разблокированного стейкинга, `false` для заблокированного). По умолчанию установлено значение `true`.
 
-### Example creation command use
+### Пример команды для создания валидатора
 
 ```bash
 ./story validator create --stake 1024000000000000000000 --moniker testValidator
 ```
 
-### Example creation command with custom flags
+### Пример команды для создания валидатора c флагами
 
 ```bash
 ./story validator create --stake 1024000000000000000000 --moniker "Story Validator" --chain-id 1516 --commission-rate 1500 --max-commission-change-rate 500 --max-commission-rate 5000 --rpc "https://odyssey.storyrpc.io"
 ```
 
-### Verifying your validator
+### Проверка валидатора
 
-Once created, please use the `Explorer URL` to confirm the transaction. If successful, you should see your validator pub key (*found in your`priv_validator_key.json` file)* listed as part of the following endpoint:
+После создания используйте указанный `Explorer URL`, чтобы подтвердить транзакцию. Если она прошла успешно, в списке валидаторов по следующей ссылке вы увидите ваш публичный ключ (*указанный в файле `priv_validator_key.json`*):
 
 ```bash
 curl https://testnet.storyrpc.io/validators | jq .
 ```
 
-Congratulations, you are now one of Story’s very first IP validators!
+Поздравляем, вы стали одним из первых IP-валидаторов Story!
 
-## Validator Staking
+## Делегирование токенов валидатору
 
-To stake to an existing validator, run the following command:
+Чтобы застейкать токены валидатору введите команду:
 
 ```bash
 ./story validator stake \
@@ -130,12 +130,12 @@ To stake to an existing validator, run the following command:
    --stake ${AMOUNT_TO_STAKE_IN_WEI}
 ```
 
-* Note that your own `${VALIDATOR_PUB_KEY_IN_HEX}`may be found by running the `./story validator export` command as the `Compressed Public Key (hex)`. 
-* You must stake at least 1024 IP worth (`*1024000000000000000000 wei`) for the transaction to be valid
+* Учтите что ваш `${VALIDATOR_PUB_KEY_IN_HEX}` может быть получен с помощью команды `./story validator export` в виде `Compressed Public Key (hex)`. 
+* Вы должны застейкать хотябы 1024 IP (`*1024000000000000000000 wei`) чтобы транзакция была валидной
 
-Once staked, you may use the `Explorer URL` to confirm the transaction. As mentioned earlier, you may use our [validator endpoint](https://rpc.odyssey.storyrpc.io/validators) to confirm the new voting power of the validator.
+После создания используйте указанный Explorer URL, чтобы подтвердить транзакцию. Вы также можете использовать [эндпоинт валидаторов](https://rpc.odyssey.storyrpc.io/validators) чтобы проверить силу голоса валидатора
 
-### Example staking command use
+### Пример команды делегирования:
 
 ```bash
 ./story validator stake \
@@ -143,9 +143,9 @@ Once staked, you may use the `Explorer URL` to confirm the transaction. As menti
   --stake 1024000000000000000000
 ```
 
-## Validator Unstaking
+## Анделегирование токенов валидатора
 
-To unstake from a validator, run the following command:
+Чтобы анделегировать токены от валидатора, выполните следующую команду:
 
 ```bash
 ./story validator unstake \
@@ -153,11 +153,11 @@ To unstake from a validator, run the following command:
   --unstake ${AMOUNT_TO_UNSTAKE_IN_WEI} \
 ```
 
-This will unstake `${AMOUNT_TO_UNSTAKE_IN_WEI}` IP from the selected validator. You must unstake at least 1024 IP worth (`*1024000000000000000000 wei`) for the transaction to be valid.
+Эта команда снимет делегированные `${AMOUNT_TO_UNSTAKE_IN_WEI}` IP с указанного валидатора. Минимальная сумма для анделегирования — 1024 IP (`1024000000000000000000 wei`).
 
-Like in the staking operation, please use the `Explorer URL` to confirm the transaction and our [validator endpoint](https://rpc.odyssey.storyrpc.io/validators) to double-check the newly reduced voting power of the validator.
+После выполнения операции используйте Explorer URL для подтверждения транзакции и [эндпоинт валидаторов](https://rpc.odyssey.storyrpc.io/validators), чтобы проверить обновленный объем голосов.
 
-### Example unstaking command use
+### Пример команды анделегирования:
 
 ```bash
 ./story validator unstake \
@@ -165,9 +165,9 @@ Like in the staking operation, please use the `Explorer URL` to confirm the tran
    --unstake 1024000000000000000000
 ```
 
-## Validator Stake-on-behalf
+## Делегирование от имени другого пользователя
 
-To stake on behalf of another delegator, run the following command:
+Чтобы делегировать токены от имени другого делегатора, выполните следующую команду:
 
 ```bash
 ./story validator stake-on-behalf \
@@ -176,11 +176,11 @@ To stake on behalf of another delegator, run the following command:
   --stake ${AMOUNT_TO_STAKE_IN_WEI} \
 ```
 
-This will stake `${AMOUNT_TO_STAKE_IN_WEI}` IP to the validator on behalf of the provided delegator. You must stake at least 1024 IP worth (`*1024000000000000000000 wei`) for the transaction to be valid.
+Эта команда делегирует `${AMOUNT_TO_STAKE_IN_WEI}` IP на валидатор от имени указанного делегатора. Минимальная сумма для делегирования — 1024 IP (`1024000000000000000000 wei`).
 
-Like in the other staking operations, please use the `Explorer URL` to confirm the transaction and our [validator endpoint](https://rpc.odyssey.storyrpc.io/validators) to double-check the increased voting power of the validator.
+После выполнения операции используйте Explorer URL для подтверждения транзакции и [эндпоинт валидаторов](https://rpc.odyssey.storyrpc.io/validators), чтобы проверить обновленный объем голосов.
 
-### Example Stake-on-behalf command use
+### Пример команды делегирования от имени:
 
 ```bash
 ./story validator stake-on-behalf \
@@ -189,9 +189,9 @@ Like in the other staking operations, please use the `Explorer URL` to confirm t
    --stake 1024000000000000000000
 ```
 
-## Validator Unstake-on-behalf
+## Анделегирование от имени другого пользователя
 
-You may also unstake on behalf of delegators. However, to do so, you must be registered as an authorized operator for that delegator. To unstake on behalf of another delegator as an operator, run the following command:
+Для анделегирования от имени другого делегатора необходимо зарегистрироваться как авторизованный оператор для этого делегатора. Команда для анделегирования:
 
 ```bash
 ./story validator unstake-on-behalf \
@@ -200,11 +200,11 @@ You may also unstake on behalf of delegators. However, to do so, you must be reg
   --unstake ${AMOUNT_TO_STAKE_IN_WEI} \
 ```
 
-This will unstake `${AMOUNT_TO_STAKE_IN_WEI}` IP from the validator on behalf of the delegator, assuming you are a registered operator for that delegator. You must unstake at least 1024 IP worth (`*1024000000000000000000 wei`) for the transaction to be valid.
+Эта команда анделегирует `${AMOUNT_TO_STAKE_IN_WEI}` IP у валидатора от имени делегатора, при условии что вы авторизованы как оператор для этого делегатора. Минимальный объем транзакции 1024 IP (`*1024000000000000000000 wei`).
 
-Like in the other staking operations, please use the `Explorer URL` to confirm the transaction and our [validator endpoint](https://rpc.odyssey.storyrpc.io/validators) to double-check the decreased voting power of the validator.
+После выполнения операции используйте Explorer URL для подтверждения транзакции и [эндпоинт валидаторов](https://rpc.odyssey.storyrpc.io/validators), чтобы проверить обновленный объем голосов.
 
-### Example Unstake-on-behalf command use
+### Пример команды анделегирования от имени:
 
 ```bash
 ./story validator unstake-on-behalf \
@@ -213,106 +213,106 @@ Like in the other staking operations, please use the `Explorer URL` to confirm t
    --unstake 1024000000000000000000
 ```
 
-## Validator Unjail
+## Разблокировка (Unjail) валидатора
 
-In case a validator becomes jailed, for example if it experiences substantial downtime, you may use the following command to unjail the targeted validator:
+Если ваш валидатор был заблокирован (например, из-за длительного простоя), выполните следующую команду для его разблокировки:
 
 ```Text Bash
 ./story validator unjail \
   --validator-pubkey ${VALIDATOR_PUB_KEY_IN_HEX}
 ```
 
-Note that you will need at least 1 IP in the wallet submitting the transaction for the transaction to be valid.
+Для выполнения транзакции на кошельке должно быть не менее 1 IP.
 
-### Example unjail command use
+### Пример команды для разблокировки:
 
 ```bash
 ./story validator unjail \
   --validator-pubkey 03bdc7b8940babe9226d52d7fa299a1faf3d64a82f809889256c8f146958a63984
 ```
 
-## Add Operator
+## Добавление оператора
 
-Delegators may add operators to unstake or redelegate on their behalf. To add an operator, run the following command:
+Делегаторы могут добавлять операторов, которые будут анделегировать или переназначать токены от их имени. Для добавления оператора выполните:
 
 ```bash
 ./story validator add-operator \
   --operator ${OPERATOR_EVM_ADDRESS}
 ```
 
-Note that you will need at least 1 IP in the wallet submitting the transaction for the transaction to be valid.
+Для выполнения транзакции на кошельке должно быть не менее 1 IP.
 
-### Example add operator command use
+### Пример команды:
 
 ```bash
 ./story validator add-operator \
   --operator 0xf398C12A45Bc409b6C652E25bb0a3e702492A4ab
 ```
 
-## Remove Operator
+## Удаление оператора
 
-To remove an operator, run the following command:
+Для удаления оператора выполните команду:
 
 ```bash
 ./story validator remove-operator \
   --operator ${OPERATOR_EVM_ADDRESS}
 ```
 
-### Example Remove Operator command use
+### Пример команды:
 
 ```bash
 ./story validator remove-operator \
   --operator 0xf398C12A45Bc409b6C652E25bb0a3e702492A4ab
 ```
 
-## Set Withdrawal Address
+## Установка адреса для вывода наград
 
-To change the address that your delegator receives staking and withdrawal rewards from, you can run the following:
+Чтобы изменить адрес, на который делегатор будет получать награды за стейкинг и выводы средств, выполните следующую команду:
 
 ```bash
 ./story validator set-withdrawal-address \
   --withdrawal-address ${OPERATOR_EVM_ADDRESS}
 ```
 
-Note that you will need at least 1 IP in the wallet submitting the transaction for the transaction to be valid.
+Обратите внимание, что для успешного выполнения транзакции в кошельке отправителя должно быть не менее 1 IP.
 
-### Example Set Withdrawal Address command use
+### Пример использования команды для установки адреса вывода
 
 ```bash
 ./story validator set-withdrawal-address \
   --withdrawal-address 0xf398C12A45Bc409b6C652E25bb0a3e702492A4ab
 ```
 
-## Migrating a validator to another machine
+## Миграция валидатора
 
-> 🚧 Important
+> 🚧 Важно
 >
-> Before migrating your validator node to a new machine, make sure the current node is fully shut down. Attempting to restore an active validator could result in "double signing," a critical error that may lead to the slashing of your delegated shares.
+> Перед переносом узла валидатора на новую машину убедитесь, что текущий узел полностью остановлен. Попытка восстановить активного валидатора может привести к "двойному подписанию", что является критической ошибкой и может привести к штрафам и потере делегированных долей.
 
-1. Begin by configuring a new environment for your validator. Ensure that the new full node is fully synced to the latest block on the network.
-2. To avoid accidental double-signing, it’s essential to fully shut down the original validator node before activating the new instance. We recommend deleting the Story service file to prevent it from automatically restarting after a system reboot. Additionally, back up your `priv_validator_key.json` file and remove it from the current server running the active validator. Skipping these steps could result in missed blocks or other penalties.
+1. Начните с настройки новой среды для вашего валидатора. Убедитесь, что новый полный узел полностью синхронизирован с последним блоком в сети.
+2. Чтобы избежать случайного "двойного подписания", крайне важно полностью остановить оригинальный узел валидатора перед активацией новой установки. Мы рекомендуем удалить файл службы Story, чтобы предотвратить его автоматический перезапуск после перезагрузки системы. Также создайте резервную копию файла `priv_validator_key.json` и удалите его с текущего сервера, где работает активный валидатор. Пропуск этих шагов может привести к пропущенным блокам или другим санкциям.
 
 ```bash
-# Step 1: Stop the original validator node
+# Шаг 1: Остановите оригинальный узел валидатора
 sudo systemctl stop <your_service_file_name>.service
 
-# Step 2: Disable the Story service to prevent automatic restarts
+# Шаг 2: Отключите службу Story, чтобы предотвратить автоматический перезапуск
 sudo systemctl disable <your_service_file_name>.service
 
-# Step 3: Delete the Story service file to prevent it from starting on reboot
+# Шаг 3: Удалите файл службы Story, чтобы предотвратить запуск при перезагрузке
 sudo rm /etc/systemd/system/<your_service_file_name>.service
 
-# Step 4: Back up the `priv_validator_key.json` file securely, e.g., using SFTP:
-# Use an SFTP client or a secure method to download the file without displaying it in the terminal
-# If needed for verification purposes only, you may view it with the following command:
+# Создайте резервную копию файла `priv_validator_key.json` безопасным способом, например, через SFTP:
+# Используйте SFTP-клиент или другой безопасный метод, чтобы загрузить файл без отображения его в терминале.
+# При необходимости файл можно просмотреть с помощью следующей команды:
 cat ~/.story/story/config/priv_validator_key.json
 
-# Step 5: Remove the `priv_validator_key.json` file from the current server
+# Шаг 5: Удалите файл `priv_validator_key.json` с текущего сервера
 rm ~/.story/story/config/priv_validator_key.json
 ```
 
-3. Locate the `priv_validator_key.json` file in the `~/.story/story/config/` directory on your new machine. Replace this file with the backup copy from your old validator.
+3. Найдите файл `priv_validator_key.json` в директории `~/.story/story/config/` на вашем новом сервере. Замените этот файл резервной копией с вашего старого валидатора.
 
-***IMPORTANT: Before you proceed, make sure you STOPPED your validator on the old server and do not start it again there.***
+***ВАЖНО: Перед продолжением убедитесь, что ВЫ ОСТАНОВИЛИ валидатора на старом сервере и больше не запускаете его там.***
 
-4. After transferring the private key file, restart the validator node on your new setup. This will reintegrate your validator with the network, enabling it to resume its validation role.
+4. После переноса файла приватного ключа запустите узел валидатора на новой машине. Это позволит вашему валидатору снова интегрироваться в сеть и продолжить выполнение своей роли.
